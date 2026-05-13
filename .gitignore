@@ -2,3 +2,6 @@
 # List explicitly so new packages must be opted in/out.
 /nix-installer-bin/
 /worklink/
+
+# nvchecker scratch — merged into oldver.json by `nvtake`.
+/newver.json
