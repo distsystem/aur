@@ -1,0 +1,16 @@
+[__config__]
+oldver = "oldver.json"
+newver = "newver.json"
+
+[worklink]
+source = "cmd"
+cmd = """
+curl -fsSL 'https://www.cm-worklink.com/lappst/hostplatform/downloadKey?build=0&versionChannel=07&downloadKey=GTLc&url=https://www.cm-worklink.com/' \
+| jq -r '"\\(.data.version.versionNo)-\\(.data.version.build)-" + (.data.version.resourceUrl | capture("-(?<c>[0-9a-f]+)_linux").c)'
+"""
+
+[nix-installer-bin]
+source = "github"
+github = "DeterminateSystems/nix-installer"
+use_latest_release = true
+prefix = "v"

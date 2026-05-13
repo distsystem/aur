@@ -1,0 +1,4 @@
+# AUR package subdirs — each is its own git repo with `aur` remote.
+# List explicitly so new packages must be opted in/out.
+/nix-installer-bin/
+/worklink/
