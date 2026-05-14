@@ -2,6 +2,8 @@
 # List explicitly so new packages must be opted in/out.
 /nix-installer-bin/
 /worklink/
+/px13-audio-fix/
+/linux-cachyos-rc-px13/
 
 # nvchecker scratch — merged into oldver.json by `nvtake`.
 /newver.json

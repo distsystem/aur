@@ -1,7 +1,14 @@
 {
   "version": 2,
   "data": {
-    "worklink": {"version": "4.3.3-2253-55e83b"},
-    "nix-installer-bin": {"version": "3.20.0"}
+    "linux-cachyos-rc-px13": {
+      "version": "7.1-rc3-2"
+    },
+    "nix-installer-bin": {
+      "version": "3.20.0"
+    },
+    "worklink": {
+      "version": "4.3.3-2253-55e83b"
+    }
   }
 }
