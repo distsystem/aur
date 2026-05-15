@@ -1,0 +1,74 @@
+name: bump
+
+on:
+  schedule:
+    - cron: '17 4 * * *'  # daily ~04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    env:
+      BRANCH: bump/auto
+
+    steps:
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed \
+            git jq github-cli nvchecker pacman-contrib openssh sudo
+
+      - name: Create build user
+        run: |
+          useradd -m builder
+          install -d -o builder -g builder /home/builder/.config
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare workspace
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          chown -R builder: "$GITHUB_WORKSPACE"
+
+      - name: Run update-all.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sudo -u builder \
+            GH_TOKEN="$GH_TOKEN" \
+            bash -c '
+              set -euo pipefail
+              cd "'"$GITHUB_WORKSPACE"'"
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              ./update-all.sh
+            '
+
+      - name: Open or refresh PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          base="${GITHUB_REF_NAME:-main}"
+          if git diff --quiet "origin/$base"..HEAD; then
+            echo "no bumps to push"
+            exit 0
+          fi
+
+          body=$(git log "origin/$base"..HEAD --format='- %s')
+          title="chore: bump packages ($(date -u +%Y-%m-%d))"
+
+          git push -f origin "HEAD:$BRANCH"
+
+          if gh pr view "$BRANCH" --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --title "$title" --body "$body"
+          else
+            gh pr create --title "$title" --body "$body" \
+              --head "$BRANCH" --base "$base"
+          fi
