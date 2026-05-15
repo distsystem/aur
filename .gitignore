@@ -1,14 +1,6 @@
-# AUR package subdirs — each is its own git repo with `aur` remote.
-# List explicitly so new packages must be opted in/out.
-/nix-installer-bin/
-/worklink/
-/px13-audio-fix/
-/linux-cachyos-rc-px13/
-/linux-cachyos-px13/
-/proart-px13/
-
-# nvchecker scratch — merged into oldver.json by `nvtake`.
+# nvchecker scratch (merged into oldver.json by nvtake)
 /newver.json
+/oldver.json~
 
 # Cloudflare Wrangler scratch
 /.wrangler/

@@ -34,27 +34,34 @@ sudo pacman -S proart-px13
 
 ## Maintainers
 
-Each AUR package is its own git repo (remote `aur`), explicitly listed in `.gitignore` so new packages must be opted in.
+All packages live inside this monorepo. Each `<pkgname>/` holds PKGBUILD + sources; AUR is a push target, not a source of truth.
 
 ```
 nvchecker.toml      version sources per package
 oldver.json         last-seen versions (committed)
-update-all.sh       nvchecker → dispatch per-pkg apply.sh
+update-all.sh       nvchecker → dispatch per-pkg apply.sh, commits to monorepo
 lib/bump.sh         shared helpers for apply.sh
+lib/aur-push.sh     publish a pkg to its AUR remote (stateless: clone + overlay + push)
 lib/release.sh      build + publish binaries to GH Releases
-<pkgname>/          one per AUR package (own git repo)
+.github/workflows/  CI: nvchecker daily, opens PR for pending bumps
+<pkgname>/          PKGBUILD + sources + optional apply.sh
 ```
 
 Daily flow:
 
 ```bash
-./update-all.sh                         # bump + commit per pkg (no push)
-cd <pkg> && git push aur main:master    # send PKGBUILD to AUR
-./lib/release.sh                        # build + push binaries to Releases
+# CI auto-opens a `bump/auto` PR if any package has upstream bumps.
+# Review, merge, then locally:
+git pull
+./lib/aur-push.sh <pkg>     # push PKGBUILD to AUR
+./lib/release.sh            # build + push binaries to Releases
 ```
+
+Manual bump (no CI): `./update-all.sh` does the same nvchecker → apply.sh → monorepo commit dance locally.
 
 Adding a package:
 
-1. `mkdir <pkgname>` with PKGBUILD + .SRCINFO, `git init -b main`, add remote `aur`, first commit, `git push aur main:master`.
-2. Add to `nvchecker.toml` and `/<pkgname>/` to `.gitignore`.
-3. Optional: `<pkgname>/apply.sh` for auto-bumps; add to `lib/release.sh` defaults to ship binaries.
+1. `mkdir <pkgname>` with PKGBUILD + .SRCINFO at the top level (no nested git repo).
+2. Add to `nvchecker.toml` so version drift gets detected.
+3. Optional: `<pkgname>/apply.sh` driving `lib/bump.sh aur_bump_if_changed` for auto-bumps; add to `lib/release.sh` defaults to ship binaries.
+4. `./lib/aur-push.sh <pkgname>` to publish to AUR.

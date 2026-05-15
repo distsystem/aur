@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Run nvchecker, then apply each package's bump via its apply.sh.
-# Does NOT push — review and `git push aur main:master` from each pkg dir.
+# Run nvchecker, then apply each package's bump via its apply.sh and
+# commit per-package to the monorepo. Does NOT push to AUR — run
+# `lib/aur-push.sh <pkg>` for that.
 set -euo pipefail
 cd "$(dirname "$(readlink -f "$0")")"
 
@@ -20,9 +21,17 @@ for line in "${diffs[@]}"; do
         continue
     fi
     echo "=== $name: $oldver -> $newver ==="
-    if "$name/apply.sh" "$newver"; then
-        nvtake -c nvchecker.toml "$name"
-    else
+    if ! "$name/apply.sh" "$newver"; then
         echo "!!! apply failed for $name; nvtake skipped" >&2
+        continue
     fi
+
+    nvtake -c nvchecker.toml "$name"
+
+    if git diff --quiet -- "$name/" oldver.json; then
+        echo "no monorepo changes for $name"
+        continue
+    fi
+    git add "$name/" oldver.json
+    git commit -m "chore($name): bump to $newver"
 done

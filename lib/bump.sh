@@ -1,13 +1,15 @@
-# Shared helpers for AUR package update.sh scripts.
+# Shared helpers for AUR package apply.sh scripts.
 # Source from a package directory; assumes PKGBUILD lives in cwd.
+#
+# Contract: apply.sh writes file changes only (no git commit).
+# The caller (update-all.sh or CI) commits to the monorepo.
 
 aur_pkgbuild_var() {
     sed -nE "s/^$1=([^ #]+).*/\1/p" PKGBUILD | head -1
 }
 
 # Apply a list of KEY=VAL bumps to PKGBUILD if any differ from current.
-# On change: also reset pkgrel=1, run updpkgsums, regen .SRCINFO, commit.
-# Does NOT push.
+# On change: reset pkgrel=1, run updpkgsums, regen .SRCINFO. No git ops.
 aur_bump_if_changed() {
     local changed=0 kv key val cur
     for kv in "$@"; do
@@ -26,11 +28,5 @@ aur_bump_if_changed() {
     sed -i -E "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
     updpkgsums
     makepkg --printsrcinfo > .SRCINFO
-    local pkgver
-    pkgver=$(aur_pkgbuild_var pkgver)
-    git add PKGBUILD .SRCINFO
-    git commit -m "chore: bump to ${pkgver}"
-    command -v notify-send >/dev/null && \
-        notify-send -u normal "AUR" "bumped $(basename "$PWD") to ${pkgver}, run: git push aur main:master"
-    echo "bumped $(basename "$PWD") to ${pkgver} (review & push)"
+    echo "applied bump for $(basename "$PWD") -> $(aur_pkgbuild_var pkgver)"
 }
