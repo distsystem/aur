@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build (if missing) + publish .pkg.tar.zst to fecet/aur-bin via GitHub Releases.
+# Build (if missing) + publish .pkg.tar.zst to distsystem/aur via GitHub Releases.
 # Maintains a pacman repo metadata so end users can yay -Syu from:
-#   Server = https://github.com/fecet/aur-bin/releases/latest/download
+#   Server = https://github.com/distsystem/aur/releases/latest/download
 #
 # Usage:
 #   release.sh                       # publish all default pkgs
@@ -9,7 +9,7 @@
 #   release.sh linux-cachyos-px13 px13-audio-fix
 set -euo pipefail
 
-REPO=fecet/aur-bin
+REPO=distsystem/aur
 TAG=latest
 REPO_NAME=fecet-bin
 AUR_DIR="$HOME/aur"
@@ -60,7 +60,7 @@ echo "==> Uploading to $REPO @ tag=$TAG"
 if ! gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
     gh release create "$TAG" -R "$REPO" \
         --title "Pacman binary repo (latest builds)" \
-        --notes "Latest builds of fecet/aur AUR packages. See README for /etc/pacman.conf setup."
+        --notes "Latest builds of distsystem/aur AUR packages. See README for /etc/pacman.conf setup."
 fi
 gh release upload "$TAG" -R "$REPO" --clobber \
     *.pkg.tar.zst \
