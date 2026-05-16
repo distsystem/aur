@@ -1,0 +1,13 @@
+[Unit]
+Description=Kimi WebBridge daemon (AI agent <-> browser extension)
+Documentation=https://kimi-webbridge.moonshot.cn
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kimi-webbridge start --foreground
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

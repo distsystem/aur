@@ -15,6 +15,16 @@ github = "DeterminateSystems/nix-installer"
 use_latest_release = true
 prefix = "v"
 
+[kimi-webbridge-bin]
+source = "cmd"
+cmd = """
+tmp=$(mktemp) && \
+curl -fsSL https://kimi-web-img.moonshot.cn/webbridge/latest/releases/kimi-webbridge-linux-amd64 -o "$tmp" && \
+chmod +x "$tmp" && \
+"$tmp" upgrade | awk 'NR==1{sub(/^v/,"",$2); print $2; exit}' ; \
+rm -f "$tmp"
+"""
+
 [linux-cachyos-px13]
 source = "cmd"
 cmd = """

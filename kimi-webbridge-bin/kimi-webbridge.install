@@ -1,0 +1,17 @@
+post_install() {
+    cat <<'EOF'
+==> kimi-webbridge installed to /usr/bin/kimi-webbridge.
+
+    Start the daemon (per-user, listens on 127.0.0.1:10086):
+        systemctl --user enable --now kimi-webbridge.service
+
+    Install the agent skill into your AI runtimes (~/.claude/skills, etc):
+        kimi-webbridge install-skill -y
+
+    Heads-up: the daemon emits telemetry to gator.volces.com on start.
+EOF
+}
+
+post_upgrade() {
+    post_install
+}

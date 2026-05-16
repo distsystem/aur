@@ -1,0 +1,25 @@
+# Maintainer: fecet <xiezej@gmail.com>
+pkgname=kimi-webbridge-bin
+_pkgname=kimi-webbridge
+pkgver=1.9.7
+pkgrel=1
+pkgdesc="Moonshot Kimi WebBridge daemon — local HTTP bridge between AI agent runtimes and a browser extension"
+arch=('x86_64' 'aarch64')
+url="https://kimi-webbridge.moonshot.cn"
+license=('custom:unknown')
+provides=("${_pkgname}=${pkgver}")
+conflicts=("${_pkgname}")
+install=${_pkgname}.install
+
+_dlbase="https://kimi-web-img.moonshot.cn/webbridge"
+source=("${_pkgname}.service")
+source_x86_64=("${_pkgname}-${pkgver}-x86_64::${_dlbase}/v${pkgver}/releases/kimi-webbridge-linux-amd64")
+source_aarch64=("${_pkgname}-${pkgver}-aarch64::${_dlbase}/v${pkgver}/releases/kimi-webbridge-linux-arm64")
+sha256sums=('SKIP')
+sha256sums_x86_64=('370c4e2a980809168f56860be510bfcb0a74857af235ecfd7742104f5dc9c688')
+sha256sums_aarch64=('e43649cad70b4f92c1ff985dfe1960c841f555bf6025d06e0a2bdec9b6f05444')
+
+package() {
+    install -Dm755 "${srcdir}/${_pkgname}-${pkgver}-${CARCH}" "${pkgdir}/usr/bin/${_pkgname}"
+    install -Dm644 "${srcdir}/${_pkgname}.service" "${pkgdir}/usr/lib/systemd/user/${_pkgname}.service"
+}

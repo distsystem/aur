@@ -1,0 +1,19 @@
+pkgbase = kimi-webbridge-bin
+	pkgdesc = Moonshot Kimi WebBridge daemon — local HTTP bridge between AI agent runtimes and a browser extension
+	pkgver = 1.9.7
+	pkgrel = 1
+	url = https://kimi-webbridge.moonshot.cn
+	install = kimi-webbridge.install
+	arch = x86_64
+	arch = aarch64
+	license = custom:unknown
+	provides = kimi-webbridge=1.9.7
+	conflicts = kimi-webbridge
+	source = kimi-webbridge.service
+	sha256sums = SKIP
+	source_x86_64 = kimi-webbridge-1.9.7-x86_64::https://kimi-web-img.moonshot.cn/webbridge/v1.9.7/releases/kimi-webbridge-linux-amd64
+	sha256sums_x86_64 = 370c4e2a980809168f56860be510bfcb0a74857af235ecfd7742104f5dc9c688
+	source_aarch64 = kimi-webbridge-1.9.7-aarch64::https://kimi-web-img.moonshot.cn/webbridge/v1.9.7/releases/kimi-webbridge-linux-arm64
+	sha256sums_aarch64 = e43649cad70b4f92c1ff985dfe1960c841f555bf6025d06e0a2bdec9b6f05444
+
+pkgname = kimi-webbridge-bin
