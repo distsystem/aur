@@ -4,9 +4,9 @@
 #   Server = https://github.com/distsystem/aur/releases/latest/download
 #
 # Usage:
-#   release.sh                       # publish all default pkgs
-#   release.sh proart-px13           # publish only one
-#   release.sh linux-cachyos-px13 px13-audio-fix
+#   release.sh                                       # publish all default pkgs
+#   release.sh asus-proart-px13-quirks               # publish only one
+#   release.sh linux-cachyos-px13 asus-proart-px13-quirks
 set -euo pipefail
 
 REPO=distsystem/aur
@@ -17,7 +17,7 @@ AUR_DIR="$HOME/distsystem/aur"
 if (( $# > 0 )); then
     pkgs=("$@")
 else
-    pkgs=(linux-cachyos-px13 px13-audio-fix proart-px13)
+    pkgs=(linux-cachyos-px13 asus-proart-px13-quirks)
 fi
 
 stage="$(mktemp -d)"

@@ -17,18 +17,16 @@ Server = https://github.com/distsystem/aur/releases/latest/download
 
 ```bash
 sudo pacman -Sy
-sudo pacman -S proart-px13
+sudo pacman -S asus-proart-px13-quirks
 ```
 
-| Package                                    | Purpose                                          |
-|--------------------------------------------|--------------------------------------------------|
-| [`proart-px13`][1]                         | Meta package — pulls in everything below         |
-| [`linux-cachyos-px13`][2] (+ `-headers`)   | CachyOS 7.0.x kernel + 16 TAS2783 codec patches  |
-| [`px13-audio-fix`][3]                      | UCM + PipeWire/WirePlumber configs               |
+| Package                                    | Purpose                                                  |
+|--------------------------------------------|----------------------------------------------------------|
+| [`asus-proart-px13-quirks`][1]             | TAS2783 audio configs + MT7925 btusb autosuspend disable; depends on the kernel below |
+| [`linux-cachyos-px13`][2] (+ `-headers`)   | CachyOS 7.0.x kernel + 16 TAS2783 codec patches          |
 
-[1]: https://aur.archlinux.org/packages/proart-px13
+[1]: https://aur.archlinux.org/packages/asus-proart-px13-quirks
 [2]: https://aur.archlinux.org/packages/linux-cachyos-px13
-[3]: https://aur.archlinux.org/packages/px13-audio-fix
 
 `SigLevel = Optional TrustAll` — HTTPS gives transport integrity, authenticity is "trust the maintainer". The pipeline supports signing without consumer-side changes if needed later.
 

@@ -1,10 +1,10 @@
 post_install() {
-    /usr/share/px13-audio-fix/patch-ucm.sh || true
+    /usr/share/asus-proart-px13-quirks/patch-ucm.sh || true
     cat <<'EOF'
 
-==> px13-audio-fix installed.
+==> asus-proart-px13-quirks installed.
 
-Manual steps still required:
+Audio (TAS2783) — manual steps still required:
 
   1. Extract the ASUS firmware blobs (proprietary, not redistributable):
      Download from
@@ -28,10 +28,15 @@ Manual steps still required:
        amixer -c1 cset name='tas2783-2 Channel Playback' Right
        sudo alsactl store
 
-Full guide: https://github.com/ftoleedo/px13-audio-fix
+Bluetooth (MT7925) — btusb autosuspend disabled via
+/usr/lib/modprobe.d/btusb-no-autosuspend.conf. Takes effect after the next
+btusb reload or reboot. If BT is already wedged, a cold boot (full power-off,
+not soft reboot) is needed to clear the firmware state machine.
+
+Audio guide: https://github.com/ftoleedo/px13-audio-fix
 EOF
 }
 
 post_upgrade() {
-    /usr/share/px13-audio-fix/patch-ucm.sh || true
+    /usr/share/asus-proart-px13-quirks/patch-ucm.sh || true
 }
