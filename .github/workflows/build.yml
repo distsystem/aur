@@ -1,0 +1,100 @@
+name: build
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Comma-separated package names (empty = all packages)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      empty: ${{ steps.set.outputs.empty }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute changed packages
+        id: set
+        env:
+          INPUT_PKGS: ${{ inputs.packages }}
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          all_pkgs() {
+            find . -maxdepth 2 -name PKGBUILD -printf '%h\n' \
+              | sed 's|^\./||' | sort -u
+          }
+
+          if [[ -n "${INPUT_PKGS:-}" ]]; then
+            mapfile -t pkgs < <(tr ',' '\n' <<<"$INPUT_PKGS" | sed '/^$/d')
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            mapfile -t pkgs < <(
+              git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+                | awk -F/ 'NF>1 {print $1}' | sort -u \
+                | while read -r d; do [[ -f "$d/PKGBUILD" ]] && echo "$d"; done
+            )
+          else
+            mapfile -t pkgs < <(all_pkgs)
+          fi
+
+          printf 'detected packages:\n'
+          printf '  - %s\n' "${pkgs[@]:-<none>}"
+
+          if (( ${#pkgs[@]} == 0 )); then
+            echo 'empty=true' >> "$GITHUB_OUTPUT"
+            echo 'matrix={"pkg":[]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'empty=false' >> "$GITHUB_OUTPUT"
+            json=$(printf '%s\n' "${pkgs[@]}" | jq -R . | jq -sc '{pkg: .}')
+            echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.empty != 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - name: Install build deps
+        run: |
+          pacman -Syu --noconfirm --needed git sudo
+
+      - name: Create builder user
+        run: |
+          useradd -m builder
+          printf 'builder ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/builder
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare workspace
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          chown -R builder: "$GITHUB_WORKSPACE"
+
+      - name: makepkg ${{ matrix.pkg }}
+        env:
+          PKG: ${{ matrix.pkg }}
+        run: |
+          sudo -u builder bash -c '
+            set -euo pipefail
+            cd "'"$GITHUB_WORKSPACE/$PKG"'"
+            makepkg --noconfirm --syncdeps --noprogressbar --skippgpcheck
+          '

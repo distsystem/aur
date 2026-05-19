@@ -41,21 +41,28 @@ update-all.sh       nvchecker → dispatch per-pkg apply.sh, commits to monorepo
 lib/bump.sh         shared helpers for apply.sh
 lib/aur-push.sh     publish a pkg to its AUR remote (stateless: clone + overlay + push)
 lib/release.sh      build + publish binaries to GH Releases
-.github/workflows/  CI: nvchecker daily, opens PR for pending bumps
+.github/workflows/  bump.yml (nvchecker daily), build.yml (makepkg per PR)
 <pkgname>/          PKGBUILD + sources + optional apply.sh
 ```
 
 Daily flow:
 
 ```bash
-# CI auto-opens a `bump/auto` PR if any package has upstream bumps.
-# Review, merge, then locally:
+# CI auto-opens a `bump/auto` PR if any package has upstream bumps,
+# then build.yml runs makepkg on the changed packages as a merge gate.
+# Once green, merge, then locally:
 git pull
 ./lib/aur-push.sh <pkg>     # push PKGBUILD to AUR
 ./lib/release.sh            # build + push binaries to Releases
 ```
 
-Manual bump (no CI): `./update-all.sh` does the same nvchecker → apply.sh → monorepo commit dance locally.
+Manual triggers:
+
+```bash
+gh workflow run bump.yml                                  # rerun nvchecker now
+gh workflow run build.yml -f packages=linux-cachyos-px13  # rebuild one (comma-list, empty = all)
+./update-all.sh                                           # local nvchecker → apply.sh, no CI
+```
 
 Adding a package:
 
