@@ -1,6 +1,8 @@
 name: build
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -28,8 +30,10 @@ jobs:
         env:
           INPUT_PKGS: ${{ inputs.packages }}
           EVENT: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_AFTER_SHA: ${{ github.event.after }}
         run: |
           set -euo pipefail
 
@@ -38,14 +42,20 @@ jobs:
               | sed 's|^\./||' | sort -u
           }
 
+          diff_pkgs() {
+            git diff --name-only "$1" "$2" \
+              | awk -F/ 'NF>1 {print $1}' | sort -u \
+              | while read -r d; do [[ -f "$d/PKGBUILD" ]] && echo "$d"; done
+          }
+
           if [[ -n "${INPUT_PKGS:-}" ]]; then
             mapfile -t pkgs < <(tr ',' '\n' <<<"$INPUT_PKGS" | sed '/^$/d')
           elif [[ "$EVENT" == "pull_request" ]]; then
-            mapfile -t pkgs < <(
-              git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-                | awk -F/ 'NF>1 {print $1}' | sort -u \
-                | while read -r d; do [[ -f "$d/PKGBUILD" ]] && echo "$d"; done
-            )
+            mapfile -t pkgs < <(diff_pkgs "$PR_BASE_SHA" "$PR_HEAD_SHA")
+          elif [[ "$EVENT" == "push" ]]; then
+            base="$PUSH_BEFORE_SHA"
+            [[ "$base" =~ ^0+$ ]] && base="${PUSH_AFTER_SHA}^"
+            mapfile -t pkgs < <(diff_pkgs "$base" "$PUSH_AFTER_SHA")
           else
             mapfile -t pkgs < <(all_pkgs)
           fi
@@ -98,3 +108,48 @@ jobs:
             cd "'"$GITHUB_WORKSPACE/$PKG"'"
             makepkg --noconfirm --syncdeps --noprogressbar --skippgpcheck
           '
+
+  push-aur:
+    needs: [detect, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect.outputs.empty != 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - name: Install deps
+        run: |
+          pacman -Syu --noconfirm --needed git openssh
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # lib/aur-push.sh reads `git log -1 -- $pkg/`
+
+      - name: Mark workspace safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Setup SSH for AUR
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$AUR_SSH_KEY" > ~/.ssh/id_aur
+          chmod 600 ~/.ssh/id_aur
+          ssh-keyscan -t rsa,ed25519 aur.archlinux.org > ~/.ssh/known_hosts 2>/dev/null
+          cat > ~/.ssh/config <<'EOF'
+          Host aur.archlinux.org
+              User aur
+              IdentityFile ~/.ssh/id_aur
+              IdentitiesOnly yes
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Configure git author
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Push ${{ matrix.pkg }} to AUR
+        run: lib/aur-push.sh ${{ matrix.pkg }}
