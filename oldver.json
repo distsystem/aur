@@ -2,9 +2,9 @@
   "version": 2,
   "data": {
     "linux-cachyos-px13": {
-      "version": "7.0.6-1"
+      "version": "7.0.9-1"
     },
-"nix-installer-bin": {
+    "nix-installer-bin": {
       "version": "3.20.0"
     },
     "worklink": {
