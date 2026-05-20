@@ -35,3 +35,12 @@ gh api 'repos/CachyOS/linux-cachyos/contents/linux-cachyos/PKGBUILD?ref=master' 
   END { print major "." minor "-" tagrel }
 '
 """
+
+[codex-desktop-linux]
+source = "cmd"
+cmd = """
+curl -fsSL 'https://persistent.oaistatic.com/codex-app-prod/appcast.xml' \
+| xmllint --xpath 'string(//*[local-name()="item"][1]/*[local-name()="shortVersionString"])' - 2>/dev/null \
+|| curl -fsSL 'https://persistent.oaistatic.com/codex-app-prod/appcast.xml' \
+| grep -oP '<sparkle:shortVersionString>\\K[^<]+' | head -1
+"""
