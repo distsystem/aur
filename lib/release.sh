@@ -5,8 +5,7 @@
 #
 # Usage:
 #   release.sh                                       # publish all default pkgs
-#   release.sh asus-proart-px13-quirks               # publish only one
-#   release.sh linux-cachyos-px13 asus-proart-px13-quirks
+#   release.sh linux-cachyos-px13                    # publish only one
 set -euo pipefail
 
 REPO=distsystem/aur
@@ -17,8 +16,16 @@ AUR_DIR="$HOME/distsystem/aur"
 if (( $# > 0 )); then
     pkgs=("$@")
 else
-    pkgs=(linux-cachyos-px13 asus-proart-px13-quirks)
+    pkgs=(linux-cachyos-px13)
 fi
+
+for pkg in "${pkgs[@]}"; do
+    if [[ $pkg == asus-proart-px13-quirks ]]; then
+        echo "Refusing to publish $pkg as a binary package: it extracts ASUS firmware during makepkg." >&2
+        echo "Install it from AUR/PKGBUILD so the firmware is downloaded and packaged on the user's machine." >&2
+        exit 1
+    fi
+done
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
@@ -31,11 +38,11 @@ for pkg in "${pkgs[@]}"; do
         continue
     fi
     cd "$pkg_dir"
-    if ! ls *.pkg.tar.zst >/dev/null 2>&1; then
+    if ! compgen -G '*.pkg.tar.zst' >/dev/null; then
         echo "  building $pkg ..."
         makepkg --noconfirm
     fi
-    for f in *.pkg.tar.zst; do
+    for f in ./*.pkg.tar.zst; do
         echo "  + $f"
         cp "$f" "$stage/"
     done
@@ -44,7 +51,7 @@ done
 # Build the pacman repo metadata
 cd "$stage"
 echo "==> Running repo-add"
-repo-add "$REPO_NAME.db.tar.zst" *.pkg.tar.zst | tail -n +1
+repo-add "$REPO_NAME.db.tar.zst" ./*.pkg.tar.zst | tail -n +1
 # repo-add creates <repo>.db / <repo>.files as symlinks; replace with real files
 # so GitHub Releases serves them as-is (releases don't preserve symlinks)
 for ext in db files; do
@@ -63,7 +70,7 @@ if ! gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
         --notes "Latest builds of distsystem/aur AUR packages. See README for /etc/pacman.conf setup."
 fi
 gh release upload "$TAG" -R "$REPO" --clobber \
-    *.pkg.tar.zst \
+    ./*.pkg.tar.zst \
     "$REPO_NAME.db" \
     "$REPO_NAME.db.tar.zst" \
     "$REPO_NAME.files" \

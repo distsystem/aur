@@ -17,12 +17,16 @@ Server = https://github.com/distsystem/aur/releases/latest/download
 
 ```bash
 sudo pacman -Sy
-sudo pacman -S asus-proart-px13-quirks
+sudo pacman -S linux-cachyos-px13 linux-cachyos-px13-headers
 ```
+
+Build `asus-proart-px13-quirks` from its AUR `PKGBUILD`. The package downloads
+the ASUS SmartAMP installer and extracts the TAS2783 firmware on the user's
+machine, so this repo does not publish a binary package for it.
 
 | Package                                    | Purpose                                                  |
 |--------------------------------------------|----------------------------------------------------------|
-| [`asus-proart-px13-quirks`][1]             | TAS2783 audio configs + MT7925 btusb autosuspend disable; depends on the kernel below |
+| [`asus-proart-px13-quirks`][1]             | TAS2783 firmware/audio configs + MT7925 btusb autosuspend disable; build from AUR |
 | [`linux-cachyos-px13`][2] (+ `-headers`)   | CachyOS 7.0.x kernel + 16 TAS2783 codec patches          |
 
 [1]: https://aur.archlinux.org/packages/asus-proart-px13-quirks
