@@ -1,9 +1,6 @@
 {
   "version": 2,
   "data": {
-    "codex-desktop-linux": {
-      "version": "26.513.31313"
-    },
     "linux-cachyos-px13": {
       "version": "7.0.9-1"
     },
