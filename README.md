@@ -34,6 +34,26 @@ machine, so this repo does not publish a binary package for it.
 
 `SigLevel = Optional TrustAll` — HTTPS gives transport integrity, authenticity is "trust the maintainer". The pipeline supports signing without consumer-side changes if needed later.
 
+## Developers
+
+Clone the repo and use `just` to build + install a single package locally without going through AUR. `just` recipes wrap `makepkg`; they do not coordinate releases (see Maintainers).
+
+```bash
+git clone https://github.com/fecet/aur && cd aur
+just packages              # list buildable packages
+just install <pkgname>     # makepkg -si in that package directory
+just build   <pkgname>     # build without installing
+just clean   <pkgname>     # remove src/, pkg/, *.pkg.tar.zst, build.log
+```
+
+Stack recipes install a group of related packages in dep order. Cross-package
+deps inside the monorepo are not auto-resolved by `makepkg`, so chains are
+written out explicitly in `justfile`:
+
+```bash
+just proart-px13           # linux-cachyos-px13 + asus-proart-px13-quirks
+```
+
 ## Maintainers
 
 All packages live inside this monorepo. Each `<pkgname>/` holds PKGBUILD + sources; AUR is a push target, not a source of truth.
