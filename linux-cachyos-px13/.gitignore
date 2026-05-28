@@ -3,6 +3,7 @@ src/
 *.pkg.tar.zst
 *.pkg.tar.xz
 PKGBUILD.upstream
+build.log
 
 # Source caches downloaded by makepkg per PKGBUILD source=()
 cachyos-*.tar.gz

@@ -54,10 +54,11 @@ source+=(
     0014-defer-check.patch
     0015-to-help-alsa-find-them.patch
     0016-cleanup-controls.patch
+    0017-ASoC-rt721-sdca-enable-jack-detect-irq-on-AMD-ACP70.patch
 )
 b2sums+=(
     SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP
-    SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP
+    SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP
 )
 CUSTOM
 
