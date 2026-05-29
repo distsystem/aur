@@ -8,7 +8,7 @@
 #   just clean   PKG        rm src/ pkg/ *.pkg.tar.zst build.log in PKG/
 #
 # Stack recipes (install in dep order):
-#   just proart-px13        linux-cachyos-px13 + asus-proart-px13-quirks
+#   just proart-px13        asus-proart-px13-quirks (PX13 audio DKMS, rides stock kernel)
 #
 # Maintainer-side helpers (publish to AUR / GitHub Releases) live in lib/.
 
@@ -37,4 +37,4 @@ clean pkg: (_check pkg)
 # stay explicit so the resolution is obvious from the recipe definition.
 
 # PX13 audio stack: CachyOS kernel + UCM/firmware quirks for ASUS ProArt PX13.
-proart-px13: (install "linux-cachyos-px13") (install "asus-proart-px13-quirks")
+proart-px13: (install "asus-proart-px13-quirks")

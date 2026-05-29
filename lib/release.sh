@@ -4,8 +4,7 @@
 #   Server = https://github.com/distsystem/aur/releases/latest/download
 #
 # Usage:
-#   release.sh                                       # publish all default pkgs
-#   release.sh linux-cachyos-px13                    # publish only one
+#   release.sh <pkgname> [<pkgname>...]              # publish named package(s); no default
 set -euo pipefail
 
 REPO=distsystem/aur
@@ -16,7 +15,8 @@ AUR_DIR="$HOME/distsystem/aur"
 if (( $# > 0 )); then
     pkgs=("$@")
 else
-    pkgs=(linux-cachyos-px13)
+    echo "no default packages to publish (binary repo idle); pass package names explicitly" >&2
+    exit 0
 fi
 
 for pkg in "${pkgs[@]}"; do

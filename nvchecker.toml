@@ -25,13 +25,3 @@ chmod +x "$tmp" && \
 rm -f "$tmp"
 """
 
-[linux-cachyos-px13]
-source = "cmd"
-cmd = """
-gh api 'repos/CachyOS/linux-cachyos/contents/linux-cachyos/PKGBUILD?ref=master' --jq '.content' | base64 -d | awk '
-  /^_major=/  {gsub(/.*=/,"",$0); major=$0}
-  /^_minor=/  {gsub(/.*=/,"",$0); minor=$0}
-  /^_tagrel=/ {gsub(/.*=/,"",$0); tagrel=$0}
-  END { print major "." minor "-" tagrel }
-'
-"""

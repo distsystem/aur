@@ -7,32 +7,25 @@ AUR orchestrator + pacman binary repo.
 
 ## End users
 
-Add to `/etc/pacman.conf`:
-
-```ini
-[distsystem-aur]
-SigLevel = Optional TrustAll
-Server = https://github.com/distsystem/aur/releases/latest/download
-```
+Install `asus-proart-px13-quirks` from AUR on any recent kernel (its `-headers`
+must be installed so DKMS can build):
 
 ```bash
-sudo pacman -Sy
-sudo pacman -S linux-cachyos-px13 linux-cachyos-px13-headers
+yay -S asus-proart-px13-quirks   # or build from its AUR PKGBUILD
 ```
-
-Build `asus-proart-px13-quirks` from its AUR `PKGBUILD`. The package downloads
-the ASUS SmartAMP installer and extracts the TAS2783 firmware on the user's
-machine, so this repo does not publish a binary package for it.
 
 | Package                                    | Purpose                                                  |
 |--------------------------------------------|----------------------------------------------------------|
-| [`asus-proart-px13-quirks`][1]             | TAS2783 firmware/audio configs + MT7925 btusb autosuspend disable; build from AUR |
-| [`linux-cachyos-px13`][2] (+ `-headers`)   | CachyOS 7.0.x kernel + 16 TAS2783 codec patches          |
+| [`asus-proart-px13-quirks`][1]             | TAS2783/rt721 audio codec patches as DKMS modules + UCM/PipeWire configs + MT7925 btusb autosuspend disable |
 
 [1]: https://aur.archlinux.org/packages/asus-proart-px13-quirks
-[2]: https://aur.archlinux.org/packages/linux-cachyos-px13
 
-`SigLevel = Optional TrustAll` — HTTPS gives transport integrity, authenticity is "trust the maintainer". The pipeline supports signing without consumer-side changes if needed later.
+The TAS2783 codec fixes (CachyOS issue 737) ship as DKMS modules that override
+the in-tree `.ko` for whatever kernel is installed, so no forked kernel is
+needed. Firmware comes from `linux-firmware-other`.
+
+The GitHub Releases binary pacman repo (`lib/release.sh`) currently publishes
+nothing; `asus-proart-px13-quirks` is distributed via AUR.
 
 ## Developers
 
@@ -51,7 +44,7 @@ deps inside the monorepo are not auto-resolved by `makepkg`, so chains are
 written out explicitly in `justfile`:
 
 ```bash
-just proart-px13           # linux-cachyos-px13 + asus-proart-px13-quirks
+just proart-px13           # asus-proart-px13-quirks (PX13 audio DKMS, rides stock kernel)
 ```
 
 ## Maintainers
@@ -84,7 +77,7 @@ Manual triggers:
 
 ```bash
 gh workflow run bump.yml                                  # rerun nvchecker now
-gh workflow run build.yml -f packages=linux-cachyos-px13  # rebuild one (comma-list, empty = all)
+gh workflow run build.yml -f packages=asus-proart-px13-quirks  # rebuild one (comma-list, empty = all)
 ./update-all.sh                                           # local nvchecker → apply.sh, no CI
 ```
 
