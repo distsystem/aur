@@ -1,7 +1,7 @@
 # Maintainer: fecet <xiezej@gmail.com>
 pkgname=nix-installer-bin
 _pkgname=nix-installer
-pkgver=3.20.0
+pkgver=3.21.0
 pkgrel=1
 pkgdesc="Determinate Nix Installer (prebuilt binary)"
 arch=('x86_64' 'aarch64')
@@ -11,8 +11,8 @@ provides=("nix-installer=${pkgver}")
 conflicts=('nix-installer')
 source_x86_64=("${_pkgname}-${pkgver}-x86_64::${url}/releases/download/v${pkgver}/nix-installer-x86_64-linux")
 source_aarch64=("${_pkgname}-${pkgver}-aarch64::${url}/releases/download/v${pkgver}/nix-installer-aarch64-linux")
-sha256sums_x86_64=('afaf0c1f426a08967aef4c7f50bbb6282a9312f945775bdf0a0110642339d9d6')
-sha256sums_aarch64=('86fadffa29c5362e16f9f8f2534603846da851ed00af103d3dbebeb30771b8b7')
+sha256sums_x86_64=('b9911496659f0c35c642353d592926c024c205b597e8094bf73a42908a75e462')
+sha256sums_aarch64=('d2ede080a0a7b34119362f4a8a6fb5e49a4d16b302ce54c96cd05514bdea6c7c')
 
 package() {
     install -Dm755 "${srcdir}/${_pkgname}-${pkgver}-${CARCH}" "${pkgdir}/usr/bin/${_pkgname}"
