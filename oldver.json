@@ -1,11 +1,14 @@
 {
-    "version": 2,
-    "data": {
-        "nix-installer-bin": {
-            "version": "3.20.0"
-        },
-        "worklink": {
-            "version": "4.3.3-2253-55e83b"
-        }
+  "version": 2,
+  "data": {
+    "kimi-webbridge-bin": {
+      "version": "1.9.14"
+    },
+    "nix-installer-bin": {
+      "version": "3.20.0"
+    },
+    "worklink": {
+      "version": "4.3.3-2253-55e83b"
     }
+  }
 }
